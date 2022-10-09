@@ -27,3 +27,6 @@ The format for `verses.tsv` matches the source data used in bontibon's KJV proje
 ```text
 Genesis	Gen	1	1	1	In the beginning God created heaven, and earth.
 ```
+
+# License
+This script is in the public domain.
