@@ -9,6 +9,10 @@ import Foundation
 
 
 class SQLiteSession {
+    enum SQLiteSessionError: Error {
+        case failToOpen(message: String)
+    }
+
     let SQLITE_TRANSIENT = unsafeBitCast(OpaquePointer(bitPattern: -1), to: sqlite3_destructor_type.self)
     
     enum ReturnType {
@@ -18,16 +22,15 @@ class SQLiteSession {
     
     private var db: OpaquePointer?
     
-    convenience init(_ path: String) {
-        self.init(path, flags: SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE)
+    convenience init(_ path: String) throws {
+        try self.init(path, flags: SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE)
     }
     
-    init(_ path: String, flags: Int32) {
+    init(_ path: String, flags: Int32) throws {
         guard sqlite3_open_v2(path, &db, flags, nil) == SQLITE_OK else {
             let message = String(cString: sqlite3_errmsg(db))
             print(message)
-            //throw DatabaseError.initializationError(message: message)
-            return
+            throw SQLiteSessionError.failToOpen(message: message)
         }
     }
     
@@ -40,7 +43,7 @@ class SQLiteSession {
             let result = sqlite3_step(statement)
             
             if result == SQLITE_DONE {
-                print("Query done!")
+                print(String(format:"Query done! %@", sql))
                 break
             } else if result == SQLITE_ROW {
                 print("---row---")
@@ -102,6 +105,7 @@ class SQLiteSession {
             let result = sqlite3_step(preparedStatement)
             
             if result == SQLITE_DONE {
+                print(String(format: "Insert %@", book.name))
                 break
             } else if result != SQLITE_BUSY {
                 let message = String(cString: sqlite3_errmsg(db))

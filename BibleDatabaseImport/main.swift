@@ -9,7 +9,7 @@ import Foundation
 
 var db: SQLiteSession
 
-db = SQLiteSession("/Users/savage/Documents/BibleDatabaseImport/dra.db")
+db = try SQLiteSession("/Users/savage/Documents/BibleDatabaseImport/dra.db")
 
 db.execute("""
 
@@ -69,6 +69,8 @@ let verses =  try String(contentsOf: versesUrl)
     .replacingOccurrences(of: "\r\n", with: "\n")
     .split(separator: "\n")
 
+print("Inserting verses...")
+
 for verse in verses {
     if verse.isEmpty {
         continue
@@ -102,6 +104,6 @@ while true {
         JOIN books ON books.id = verses.book
         WHERE
             text MATCH "\(query!)"
-        ORDER BY rank LIMIT 3;
+        LIMIT 3;
     """)
 }
